@@ -277,3 +277,9 @@ The benchmark can be computed in minutes, but the project takes a long time beca
 - Re-entry: Component G can be re-added as a new deviation if written permission from the source is obtained.
 
 **Deviation 2 (2026-10-29): data preparation script added.** `src/00_prep_data.R` was added to read the raw files, check that the Stata and text copies of the NSW sample agree, and write `data/processed/` and `results/data_summary.csv`. It is not in the Section 6 layout list. It uses no outcome values to build any sample and computes no effect estimate. The layout otherwise follows Section 6, plus `DATA.md` at the repository root and `data/README.md`.
+
+**Deviation 3 (2026-10-29, disclosure of an outcome count, after the design was locked): one descriptive tally of the outcome by arm.**
+- What happened: while checking the NSW experimental file during the data preparation step, one cross-tabulation of `re78 == 0` by `treat` was printed once. Result: 45 of 185 treated and 92 of 260 control people had zero 1978 earnings.
+- What it is not: it is not an effect estimate, p-value, or comparison of estimates. No estimator was written or run. It did not touch any Section 3 to 5 choice.
+- Protocol impact: none. No tuning choice, estimator, metric, pass/fail rule, or sample definition was changed in response to it. The design text above is unchanged apart from Deviations 1 and 2.
+- Going forward: no further `re78` statistic is computed by arm before the protocol is run. The pre-treatment top-coding and zero counts that were added to `src/00_prep_data.R` are not split by arm.

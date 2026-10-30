@@ -70,7 +70,8 @@ saveRDS(nsw,  file.path(proc_dir, "nsw_experimental.rds"))
 saveRDS(psid, file.path(proc_dir, "psid_comparison.rds"))
 saveRDS(cps,  file.path(proc_dir, "cps_comparison.rds"))
 
-# Summary table (no outcome means, only counts, ranges, missingness).
+# Summary table: counts, ranges, missingness, and a top-coding check.
+# No outcome means are computed, and the outcome (re78) is not counted by arm.
 summ_one <- function(df, label) {
   out <- data.frame(
     sample = label,
@@ -79,6 +80,16 @@ summ_one <- function(df, label) {
     n_missing = sapply(df[, txt_cols], function(x) sum(is.na(x))),
     min = sapply(df[, txt_cols], function(x) min(x, na.rm = TRUE)),
     max = sapply(df[, txt_cols], function(x) max(x, na.rm = TRUE)),
+    # Rows sitting exactly at the column maximum, for the earnings variables
+    # only. A large count would suggest top-coding (a cap on recorded earnings).
+    n_at_max = sapply(txt_cols, function(v) {
+      if (v %in% c("re74", "re75", "re78")) sum(df[[v]] == max(df[[v]], na.rm = TRUE)) else NA_integer_
+    }),
+    # Zeros in the pre-treatment earnings variables only. Zeros in re78 are
+    # deliberately not counted here, so no outcome counts are produced.
+    n_zero_pretreatment = sapply(txt_cols, function(v) {
+      if (v %in% c("re74", "re75")) sum(df[[v]] == 0) else NA_integer_
+    }),
     n_treated = sum(df$treat == 1),
     n_control = sum(df$treat == 0),
     stringsAsFactors = FALSE
