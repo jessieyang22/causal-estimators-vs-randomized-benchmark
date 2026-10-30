@@ -1,0 +1,11 @@
+# Raw and processed data are downloaded or rebuilt by scripts; not committed.
+data/raw/
+data/processed/
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user/
+
+# Scratch output
+*.tmp
