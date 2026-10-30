@@ -2,7 +2,7 @@
 
 This project asks one question with real data. The LaLonde job-training experiment (National Supported Work, NSW) randomly assigned people to job training or to no training. Because of the random assignment, the difference in their 1978 earnings is a trustworthy answer for the people who got the training. Then we pretend we never ran the experiment. We take the same trainees and compare them with people who were never in the program, drawn from survey data (PSID or CPS). We ask: do standard observational methods get close to the experimental answer?
 
-**Short answer: no, not reliably.** Some methods land inside the experimental interval for one comparison group but not the other, and every method that passes the benchmark test fails a placebo test. The full numbers are below. The summary claim that the observational methods "recovered the experimental answer" is **not** supported.
+**Short answer: no, not reliably.** Matching and AIPW pass the benchmark test in both comparison groups. Regression and difference-in-differences (DiD) pass it for PSID only. But every cross-sectional estimator (1 to 5) fails the 1975 placebo test in both groups. Only PSID DiD passes both tests. The summary claim that the observational methods "recovered the experimental answer" needs 4 of 6 estimators to pass both tests in one group, so it is **not** supported.
 
 ---
 
@@ -50,7 +50,7 @@ Plain-English version of each step. Each script is in `src/`.
 1. *Naive:* difference in average 1978 earnings, with no adjustment.
 2. *Regression adjustment:* fit a model of 1978 earnings on the eight covariates using only the comparison group. Predict what each treated person would have earned without the program, and average the gap.
 3. *Nearest-neighbour matching:* for each treated person, find the comparison person with the closest propensity score (the estimated chance of being in the program, from the eight covariates). Caliper 0.2 standard deviations, matching with replacement, using the `Matching` package.
-4. *Inverse probability weighting (IPW):* weight comparison people by their odds of being treated, so that the comparison group looks more like the treated group.
+4. *Inverse probability weighting (IPW):* weight comparison people by their odds of being treated, so that the comparison group resembles the treated group.
 5. *Doubly robust (AIPW):* combine the regression and the weighting, so that the answer is right if either model is right.
 6. *Difference-in-differences (DiD):* the treated group's change from 1975 to 1978 minus the comparison group's change over the same years.
 
@@ -140,13 +140,13 @@ The claim "observational methods recovered the experimental answer" needs at lea
 
 ### 4e. Why methods fail (diagnostics, `results/diagnostics_weights_matching.csv`, `results/balance_after_adjustment.csv`)
 
-- **Weighting (IPW and AIPW) has an overlap problem in both groups.** Effective sample size is 51 of 2,490 comparison people for PSID (2.1%), and the largest weight is 133 times the average. For CPS it is 1,209 of 15,992 (7.6%), and the largest weight is 48 times the average. Both fail the largest-weight rule in `DESIGN.md` 5 (a weight above 10 times the mean). The PSID effective sample size (51) is just above the 50 threshold. After IPW, the largest remaining imbalance is on the propensity score itself (SMD 0.26 for PSID, 1.39 for CPS). Among the eight covariates, the largest remaining imbalance is no-degree (0.43 for CPS). The weighted PSID estimate rests on very few comparison people.
-- **Matching balances the covariates better but not perfectly.** For PSID, all 185 treated people found a match within the caliper, using 171 distinct comparison people; the largest remaining imbalance is married (SMD 0.32). For CPS, all 185 found a match, using 1,046 distinct people; the largest remaining imbalance is black (SMD 1.12). The CPS matches are still far from balanced on race, which is the main reason to distrust the CPS matching estimate even though it passes the benchmark test. The caliper never dropped a treated person, so the caliper and no-caliper results are identical.
-- **Regression and DiD have no weights.** Their failures come from the model: regression depends on the outcome model being right, and DiD depends on comparison people changing like the treated people, which the placebo test does not support.
+- **Weighting (IPW and AIPW) has an overlap problem and leaves large covariate differences in both groups.** Effective sample size is 51 of 2,490 comparison people for PSID (2.1%), and the largest weight is 133 times the average. For CPS it is 1,209 of 15,992 (7.6%), and the largest weight is 48 times the average. Both fail the largest-weight rule in `DESIGN.md` 5 (a weight above 10 times the mean). The PSID effective sample size (51) is just above the 50 threshold, so the PSID weighted estimate depends on about 51 comparison people. After IPW, the propensity score itself is still unbalanced (SMD 0.26 for PSID, 1.39 for CPS). The largest covariate difference is 1974 earnings for PSID (SMD −0.24) and black for CPS (SMD 1.08).
+- **Matching balances the covariates well, but the balance rule is still exceeded for age.** For PSID, all 185 treated people found a match within the caliper, using 171 distinct comparison people. Before matching, married differed by SMD −1.84; after matching, every covariate is within 0.21, and the largest is age (0.20). For CPS, all 185 found a match, using 1,046 distinct people; after matching, the largest difference is again age (0.21), and black is 0.01. Age is above the 0.1 limit in `DESIGN.md` 5 (item 4) in both groups. The caliper never dropped a treated person, so the caliper and no-caliper results are identical. The matched-weight balance uses each control's total matching weight (`Match`'s own weights), which sum to the 185 treated people.
+- **Regression and DiD have no weights.** Their failures come from the model: regression depends on the outcome model being right, and DiD depends on comparison people changing in the same way as the treated people, which the placebo test does not support.
 
 ### 4f. Sensitivity to hidden confounding (`src/05_sensitivity.R`)
 
-- **Rosenbaum bounds (matched pairs, 185 pairs).** For PSID, the matched result is significant at Gamma = 1 (upper-bound p = 0.004) and stops being significant at the 5% level between Gamma = 1 and Gamma = 1.25 (upper-bound p = 0.076 at 1.25). For CPS, the matched-pair signed-rank test is not significant even at Gamma = 1 (upper-bound p = 0.07), so the matched CPS estimate is not robust to any hidden bias. These are the p-values returned by `rbounds::psens`. Matching with replacement reuses comparison people, so these pairs are not independent, which means the bounds are approximate.
+- **Rosenbaum bounds (matched pairs, 185 pairs).** For PSID, the matched result is significant at Gamma = 1 (upper-bound p = 0.004) and stops being significant at the 5% level between Gamma = 1 and Gamma = 1.25 (upper-bound p = 0.076 at 1.25). For CPS, the matched-pair test is already not significant at Gamma = 1 (upper-bound p = 0.070), so there is no robustness to hidden bias to report. The p-values are those returned by `rbounds::psens`. That function reports one-sided Wilcoxon signed-rank bounds for a positive effect, and it drops pairs with a zero difference. Matching with replacement reuses comparison people, so these pairs are not independent, which means the bounds are approximate.
 - **Robustness value (pooled regression, `sensemakr`).** The pooled regression is used because `sensemakr` needs a treatment coefficient. Its estimate is $752 for PSID and $699 for CPS. An unobserved confounder would need to explain only 1.6% (PSID) and 1.0% (CPS) of the remaining variation in both treatment and earnings to shrink that estimate to zero. Moving it to the benchmark ($1,794) needs 2.2% (PSID) and 1.6% (CPS). The estimate is not significant at the 5% level even before any confounding (the significance robustness value is 0 in both groups).
 - **Benchmarking against observed covariates.** The 1975 earnings variable has the largest partial R-squared with the outcome (0.16 in PSID, 0.09 in CPS). Its partial R-squared with treatment is small (0.003 PSID, 0.001 CPS). If a confounder as strong as 1975 earnings were left out, the pooled PSID estimate would move to about −$266, and the pooled CPS estimate to about +$46. This shows that the pooled PSID estimate can change sign under a confounder of 1975 earnings' observed strength. It does not show that such a confounder exists.
 
@@ -184,7 +184,7 @@ The robustness summary (`results/robustness_summary.csv`) applies the fragility 
 
 Root mean squared error of the bias across the primary and grid cells: PSID regression $1,190, matching $1,271, IPW $4,740, AIPW $688, DiD $532 (primary only), naive $16,999. CPS regression $1,137, matching $315, IPW $6,766, AIPW $885, DiD $1,827 (primary only), naive $10,292.
 
-The grid does not change the conclusion. Matching is the estimator that passes the benchmark test in both groups and in almost every grid cell, but it fails the 1975 placebo in both groups (Section 4c), so it does not meet the summary-claim rule. Its covariate balance on race is also poor (Section 4e).
+The grid does not change the conclusion. Matching passes the benchmark test in both groups and in almost every grid cell, but it fails the 1975 placebo in both groups (Section 4c), so it does not meet the summary-claim rule.
 
 ### 4h. Figures
 
@@ -202,7 +202,7 @@ The grid does not change the conclusion. Matching is the estimator that passes t
 - **The CPS doubly robust (AIPW) estimate is fragile.** It passes the benchmark test in the primary specification, but it fails with a propensity cap of 0.05 and without 1974 earnings. Its bias is about −$770 to −$1,000 in those variants, and the intervals exclude zero.
 - **The CPS difference-in-differences estimate** is about $1,800 too high, and its interval does not contain zero.
 - **Regression adjustment for CPS** is about $1,100 too low, and its interval does not contain zero.
-- **The CPS matching estimate** passes the benchmark test, but its covariate balance on race is poor (SMD 1.12), and the matched-pair test is not significant even at Gamma = 1.
+- **The CPS matching estimate** passes the benchmark test and leaves only a small age difference (SMD 0.21). It still fails the 1975 placebo, and its matched-pair test is not significant even with no hidden bias.
 - **The randomization check** showed an omnibus imbalance (p = 0.034) in the experimental sample. It did not reach the stop threshold, but the adjusted estimators must handle it.
 - **Synthetic control** was not applied. The data have only two pre-program years and no panel of units, so the design could not be built as specified (`DESIGN.md`, Section 3c).
 
@@ -232,11 +232,11 @@ From the repository root:
 Rscript data/download_lalonde.R      # downloads the raw files (about 3 MB) into data/raw/
 Rscript src/00_prep_data.R           # cleans the files, writes data/processed/ and results/data_summary.csv
 Rscript src/01_benchmark.R           # Component A
-Rscript src/02_observational.R       # Component B (about 10 minutes on 8 cores)
+Rscript src/02_observational.R       # Component B (about 10 minutes on 8 cores, measured)
 Rscript src/03_diagnostics.R         # Component C
-Rscript src/04_placebo.R             # Component D (about 25 minutes on 8 cores)
+Rscript src/04_placebo.R             # Component D (tens of minutes on 8 cores; CPS cells take a few minutes each)
 Rscript src/05_sensitivity.R         # Component E
-Rscript src/06_robustness.R          # Component F (about 40 minutes on 8 cores)
+Rscript src/06_robustness.R          # Component F (tens of minutes on 8 cores; CPS cells take a few minutes each)
 Rscript src/08_figures.R             # figures and results/session_info.txt
 ```
 

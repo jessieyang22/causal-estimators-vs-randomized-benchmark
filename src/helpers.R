@@ -124,7 +124,13 @@ estimate <- function(method, yT, yC, dT, dC, covs,
     out$att <- unname(m$est)
     out$se <- unname(m$se)
     out$dropped <- nT - length(unique(m$index.treated))
-    cc <- tabulate(m$index.control - nT, nbins = nC)
+    # Match() gives each matched row a weight (1 / number of tied controls for
+    # that treated unit). Summing the row weights per comparison unit gives the
+    # weight each control carries in the matched sample; the total is nT.
+    stopifnot(length(m$weights) == length(m$index.control))
+    cc <- numeric(nC)
+    agg <- rowsum(m$weights, m$index.control - nT)
+    cc[as.integer(rownames(agg))] <- agg[, 1]
     out$ctrl_count <- cc
     return(out)
   }

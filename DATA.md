@@ -1,6 +1,6 @@
 # Data record: causal-estimators-vs-randomized-benchmark
 
-Status: data acquired and checked on 2026-10-29. No treatment effect, p-value on an outcome, or comparison of estimates has been computed.
+Status: data acquired and checked on 2026-10-29. At that time, no treatment effect, p-value on an outcome, or comparison of estimates had been computed. Those analyses were run later; see `DESIGN.md` and `README.md`.
 
 **Disclosure of an outcome count.** During the data check on 2026-10-29, after the design was locked, one cross-tabulation of the outcome was printed once: `re78 == 0` by treatment arm in the NSW experimental sample gave 45 of 185 treated and 92 of 260 controls with zero 1978 earnings. This is a descriptive tally, not an effect estimate. No protocol choice was made or changed in response to it. It is recorded as Deviation 3 in `DESIGN.md`. No further `re78` statistic has been computed by arm. The ranges and counts in this file, other than the item above, are not split by arm.
 
