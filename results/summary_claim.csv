@@ -1,0 +1,3 @@
+"group","n_estimators","n_pass_benchmark","n_pass_benchmark_and_placebo","claim_met","passing_estimators"
+"PSID",6,4,1,FALSE,"did"
+"CPS",6,2,0,FALSE,""

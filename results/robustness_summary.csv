@@ -1,0 +1,13 @@
+"group","method","estimator","primary_pass","n_grid_cells","n_grid_fail","grid_fail_share","fragile","rmse_bias_all_cells","rmse_bias_grid_only"
+"PSID","naive","1 Naive difference",FALSE,0,0,NA,NA,16999.119878082,NA
+"CPS","naive","1 Naive difference",FALSE,0,0,NA,NA,10291.8585526921,NA
+"PSID","reg","2 Regression adjustment",TRUE,1,0,0,FALSE,1190.40912876272,1351.49510300886
+"CPS","reg","2 Regression adjustment",FALSE,1,1,1,FALSE,1137.38580135849,1169.36196661884
+"PSID","match","3 Nearest-neighbour matching",TRUE,3,1,0.333333333333333,FALSE,1271.10554356258,1461.84590771059
+"CPS","match","3 Nearest-neighbour matching",TRUE,3,0,0,FALSE,315.107105654239,359.125654819793
+"PSID","ipw","4 Inverse probability weighting",FALSE,2,2,1,FALSE,4739.97898534683,5634.41648532907
+"CPS","ipw","4 Inverse probability weighting",FALSE,2,2,1,FALSE,6766.31885090265,7375.69454973877
+"PSID","aipw","5 Doubly robust (AIPW)",TRUE,2,0,0,FALSE,687.844210682394,837.374099979045
+"CPS","aipw","5 Doubly robust (AIPW)",TRUE,2,2,1,TRUE,884.533270734517,935.515844448179
+"PSID","did","6 Difference-in-differences",TRUE,0,0,NA,NA,532.162395835238,NA
+"CPS","did","6 Difference-in-differences",FALSE,0,0,NA,NA,1826.88951031142,NA

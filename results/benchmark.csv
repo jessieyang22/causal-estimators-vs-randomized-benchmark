@@ -1,0 +1,5 @@
+"outcome","estimator","est","se","lo","hi","n_treated","n_control","perm_p"
+"re78 (primary benchmark, unadjusted)","NSW experimental difference in means",1794.3423818501,670.996544467332,479.189154694132,3109.49560900607,185,260,0.0034996500349965
+"re78 (secondary, regression adjusted)","OLS coefficient on treat, 8 covariates",1676.34262540307,638.682014898315,424.525876202374,2928.15937460377,185,260,NA
+"re75 (placebo benchmark)","NSW experimental difference in means",265.146298528664,305.044283550991,-332.740497231279,863.033094288607,185,260,NA
+"re75 minus re74 (pre-trend benchmark)","NSW experimental difference in change scores",276.599256411612,383.76270777,-475.575650817588,1028.77416364081,185,260,NA

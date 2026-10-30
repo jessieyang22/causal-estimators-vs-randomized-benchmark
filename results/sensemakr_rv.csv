@@ -1,0 +1,29 @@
+"group","quantity","value","r2_with_outcome","estimate_if_confounder_as_strong"
+"PSID","pooled OLS treat coefficient",751.946396902203,NA,NA
+"PSID","NSW benchmark",1794.3423818501,NA,NA
+"PSID","fraction of estimate to remove to reach benchmark (negative = increase)",-1.38626368746796,NA,NA
+"PSID","robustness value to reduce estimate to zero (RV)",0.0157884443089115,NA,NA
+"PSID","robustness value to reduce estimate to zero, alpha 0.05 (RV_qa)",0,NA,NA
+"PSID","robustness value to move estimate to benchmark (RV_q)",0.0218197813781796,NA,NA
+"PSID","benchmark covariate: age (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00848716437768078,0.00615215253277392,409.070105188072
+"PSID","benchmark covariate: education (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.0053283981356317,0.0124808816018803,365.603547030035
+"PSID","benchmark covariate: black (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.0362587546719735,0.000536353366187067,539.698450306346
+"PSID","benchmark covariate: hispanic (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00427713462614681,0.00148445699868642,632.634760065641
+"PSID","benchmark covariate: married (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.125572344307678,0.0021626588557777,-80.7196206063423
+"PSID","benchmark covariate: nodegree (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.0169333881723846,0.000323507807354433,640.410512579904
+"PSID","benchmark covariate: re74 (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00152890457643334,0.0373361188666816,394.690998472297
+"PSID","benchmark covariate: re75 (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00288623492440981,0.160357983038811,-266.013217348348
+"CPS","pooled OLS treat coefficient",699.13174713067,NA,NA
+"CPS","NSW benchmark",1794.3423818501,NA,NA
+"CPS","fraction of estimate to remove to reach benchmark (negative = increase)",-1.56652968373174,NA,NA
+"CPS","robustness value to reduce estimate to zero (RV)",0.00999015039433621,NA,NA
+"CPS","robustness value to reduce estimate to zero, alpha 0.05 (RV_qa)",0,NA,NA
+"CPS","robustness value to move estimate to benchmark (RV_q)",0.0156054215134413,NA,NA
+"CPS","benchmark covariate: age (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",7.56459715953479e-05,0.0185580593477936,616.626349009012
+"CPS","benchmark covariate: education (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.000421133545902783,0.00194283439022871,636.133853037498
+"CPS","benchmark covariate: black (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.0847876316941228,0.00113381430778224,-14.514577786666
+"CPS","benchmark covariate: hispanic (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.000148588754217093,6.16776344804915e-05,692.465278370215
+"CPS","benchmark covariate: married (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00279736641449344,1.6378517112972e-05,684.206311552552
+"CPS","benchmark covariate: nodegree (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.00231047054757755,0.000273011295975346,643.764927888677
+"CPS","benchmark covariate: re74 (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",2.5897277144941e-05,0.035491400979951,632.374102953938
+"CPS","benchmark covariate: re75 (value = partial R2 with treatment; r2_with_outcome = partial R2 with outcome)",0.000946305055754882,0.0927987976748917,46.3032636917976

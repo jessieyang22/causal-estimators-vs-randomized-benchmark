@@ -1,0 +1,2 @@
+"statistic","observed_LR","df","perm_p","n_perm","seed","stop_threshold","stop_triggered"
+"LR for treat ~ 8 covariates (NSW)",16.9835649766643,8,0.0341965803419658,10000,20261029,0.01,FALSE
