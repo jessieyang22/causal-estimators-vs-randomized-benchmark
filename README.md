@@ -16,7 +16,7 @@ This project asks one question with real data. The LaLonde job-training experime
   3. Where a method fails, which covariate imbalance or overlap problem is responsible?
   4. How strong would an unobserved confounder have to be to explain the gap?
 
-The protocol (estimators, pass/fail rules, robustness grid) was written in `DESIGN.md` before any outcome was compared. Implementation rules the design left open were fixed in `DESIGN.md` Deviation 4 before the benchmark was run, and the other deviations are listed there with dates. During the run, a few code errors were fixed (for example, the Rosenbaum pairs were rebuilt from `Matching::Match`'s own output after a sanity check showed a mismatch, and the `sensemakr` direction argument was corrected after an error). Those fixes changed no protocol choice and no pass/fail rule.
+The protocol (estimators, pass/fail rules, robustness grid) was written in `DESIGN.md` before any outcome was compared. Before this repo was made public (2026-10-30), its git history was rewritten once to replace the author email with a GitHub noreply address, so commit hashes differ from any earlier local copy; the order and contents of the commits are unchanged. Implementation rules the design left open were fixed in `DESIGN.md` Deviation 4 before the benchmark was run, and the other deviations are listed there with dates. During the run, a few code errors were fixed (for example, the Rosenbaum pairs were rebuilt from `Matching::Match`'s own output after a sanity check showed a mismatch, and the `sensemakr` direction argument was corrected after an error). Those fixes changed no protocol choice and no pass/fail rule.
 
 ---
 
