@@ -9,7 +9,9 @@
 #      regression estimate). Includes the value needed to move the estimate to
 #      the NSW benchmark.
 #   3. Benchmarking: partial R-squared of each observed covariate, to compare
-#      with the strength needed to explain the gap.
+#      with the strength needed to explain the gap. Run in both directions:
+#      the default (reduce = TRUE) and upward (reduce = FALSE, Deviation 6,
+#      written to results/sensemakr_benchmark_upward.csv).
 # Run from the repository root: Rscript src/05_sensitivity.R
 
 if (!file.exists("DESIGN.md")) stop("Run this script from the repository root.")
@@ -45,6 +47,7 @@ match_pairs <- function(yT, yC, lT, lC, caliper = 0.2) {
 gamma_grid <- seq(1, 3, by = 0.25)
 gamma_rows <- list()
 rv_rows <- list()
+up_rows <- list()
 
 for (g in c("psid", "cps")) {
   label <- if (g == "psid") "PSID" else "CPS"
@@ -126,6 +129,23 @@ for (g in c("psid", "cps")) {
       estimate_if_confounder_as_strong = row$adjusted_estimate,
       stringsAsFactors = FALSE
     )
+
+    # Deviation 6: the loop above only moves the estimate down (sensemakr's
+    # default reduce = TRUE). The gap to the benchmark is upward, so the same
+    # covariate-strength confounder is also computed in the upward direction.
+    sb_up <- sensemakr(model = fit, treatment = "treat", q = 1, alpha = 0.05,
+                       reduce = FALSE, benchmark_covariates = cv)
+    row_up <- sb_up$bounds[sb_up$bounds$bound_label == paste0("1x ", cv), , drop = FALSE]
+    up_rows[[paste(label, cv)]] <- data.frame(
+      group = label,
+      covariate = cv,
+      r2_with_treatment = row_up$r2dz.x,
+      r2_with_outcome = row_up$r2yz.dx,
+      estimate_if_confounder_as_strong_upward = row_up$adjusted_estimate,
+      nsw_benchmark = bench_re78,
+      reaches_benchmark = row_up$adjusted_estimate >= bench_re78,
+      stringsAsFactors = FALSE
+    )
   }
   message(label, ": pooled est = ", round(est_pooled, 2), " ; RV = ", round(st_zero$rv_q, 4),
           " ; RV to benchmark = ", round(st_bench$rv_q, 4), " ; q = ", round(q_raw, 4),
@@ -140,5 +160,10 @@ rv <- do.call(rbind, rv_rows)
 rownames(rv) <- NULL
 write.csv(rv, file.path(res_dir, "sensemakr_rv.csv"), row.names = FALSE)
 
+up <- do.call(rbind, up_rows)
+rownames(up) <- NULL
+write.csv(up, file.path(res_dir, "sensemakr_benchmark_upward.csv"), row.names = FALSE)
+
 print(gam)
 print(rv)
+print(up)

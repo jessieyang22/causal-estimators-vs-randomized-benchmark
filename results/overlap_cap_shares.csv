@@ -1,0 +1,5 @@
+"group","cap","n_comp","n_capped_low","share_capped_low","n_capped_high","share_weight_from_capped_low","max_weight_ratio","ess","n_raw_ps_exact_0_or_1","glm_warning"
+"PSID",0.01,2490,1952,0.783935742971888,0,0.0974504200468507,132.613526306397,51.4204369043428,0,"glm.fit: fitted probabilities numerically 0 or 1 occurred"
+"PSID",0.05,2490,2249,0.903212851405622,0,0.403228316070521,91.4037248810717,107.4555357883,0,"glm.fit: fitted probabilities numerically 0 or 1 occurred"
+"CPS",0.01,15992,14492,0.906203101550775,0,0.462485894500207,48.2320132105798,1209.4098684077,0,""
+"CPS",0.05,15992,15458,0.966608304152076,0,0.841560796591068,15.7912250513191,7549.97527420566,0,""

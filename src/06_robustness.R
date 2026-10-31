@@ -1,7 +1,7 @@
 # src/06_robustness.R
 #
 # Component F: robustness grid (DESIGN.md 3f, with Deviation 4(m)).
-# Grid variants (fixed before results):
+# Grid variants (fixed before results), defined in src/helpers.R (grid_cells):
 #   - propensity cap 0.05 instead of 0.01 (IPW, AIPW)
 #   - matching caliper 0.1 SD (secondary) and no caliper (matching)
 #   - covariate set without re74 (regression, matching, IPW, AIPW)
@@ -12,7 +12,7 @@
 # Also writes, per estimator, the fragility rule (DESIGN.md 5, item 5): an
 # estimator that passes the primary benchmark test but fails in more than half
 # of its grid cells is marked "fragile". Also writes the RMSE of the bias across
-# the primary and grid cells.
+# the primary and grid cells. The revised matching rule is in src/10_verdicts.R.
 # Run from the repository root: Rscript src/06_robustness.R
 
 if (!file.exists("DESIGN.md")) stop("Run this script from the repository root.")
@@ -20,25 +20,7 @@ source(file.path("src", "helpers.R"))
 res_dir <- "results"
 proc_dir <- file.path("data", "processed")
 S <- load_samples()
-CORES <- 8L
-
-grid_cells <- function(label) {
-  base <- function(id, est, method, covs, trim = 0.01, caliper = 0.2, variant) {
-    list(id = paste0(label, "_", id), estimator = est, method = method,
-         obs = OUT_RE78, bench = OUT_RE78, covs = covs, trim = trim,
-         caliper = caliper, grid_type = variant)
-  }
-  list(
-    base("ipw_trim05", "4 Inverse probability weighting", "ipw", COVS8, trim = 0.05, variant = "trim 0.05"),
-    base("aipw_trim05", "5 Doubly robust (AIPW)", "aipw", COVS8, trim = 0.05, variant = "trim 0.05"),
-    base("match_cal01", "3 Nearest-neighbour matching", "match", COVS8, caliper = 0.1, variant = "caliper 0.1 SD"),
-    base("match_nocal", "3 Nearest-neighbour matching", "match", COVS8, caliper = NULL, variant = "no caliper"),
-    base("reg_no74", "2 Regression adjustment", "reg", COVS_NO74, variant = "without re74"),
-    base("match_no74", "3 Nearest-neighbour matching", "match", COVS_NO74, variant = "without re74"),
-    base("ipw_no74", "4 Inverse probability weighting", "ipw", COVS_NO74, variant = "without re74"),
-    base("aipw_no74", "5 Doubly robust (AIPW)", "aipw", COVS_NO74, variant = "without re74")
-  )
-}
+CORES <- default_cores()
 
 rows <- list()
 for (g in c("psid", "cps")) {

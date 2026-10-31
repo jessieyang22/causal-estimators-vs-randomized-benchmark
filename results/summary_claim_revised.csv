@@ -1,0 +1,7 @@
+"seed","group","n_pass_benchmark","n_pass_placebo","n_pass_both","claim_met","passing_both","benchmark_passing"
+20261029,"PSID",3,1,1,FALSE,"did","reg;aipw;did"
+20261029,"CPS",2,1,0,FALSE,"","match;aipw"
+20361029,"PSID",3,1,1,FALSE,"did","reg;aipw;did"
+20361029,"CPS",2,0,0,FALSE,"","match;aipw"
+20461029,"PSID",3,1,1,FALSE,"did","reg;aipw;did"
+20461029,"CPS",2,1,0,FALSE,"","match;aipw"

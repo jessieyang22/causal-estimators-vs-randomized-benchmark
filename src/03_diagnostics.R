@@ -6,7 +6,11 @@
 #   - SMD of the logit propensity score before and after;
 #   - Kish effective sample size and largest-weight ratio (IPW and AIPW);
 #   - matching counts (matched, dropped, distinct controls);
-#   - overlap plots of the propensity score, treated versus comparison.
+#   - overlap plots of the propensity score, treated versus comparison;
+#   - how much of the IPW and AIPW weight comes from propensity scores that are
+#     capped (raw score below 0.01, or below 0.05 for the grid variant), and the
+#     glm warnings about fitted probabilities of 0 or 1 (review item, Deviation 7).
+#     Written to results/overlap_cap_shares.csv.
 # Run from the repository root: Rscript src/03_diagnostics.R
 
 if (!file.exists("DESIGN.md")) stop("Run this script from the repository root.")
@@ -27,7 +31,12 @@ for (g in c("psid", "cps")) {
   yC <- comp$re78
 
   # Propensity score scale for the overlap check (logit), pooled SD unadjusted.
-  pt_ps <- fit_ps(nswT, comp, COVS8)
+  glm_warn <- character(0)
+  pt_ps <- withCallingHandlers(fit_ps(nswT, comp, COVS8),
+    warning = function(w) {
+      glm_warn <<- c(glm_warn, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
   lT <- qlogis(pt_ps$pT)
   lC <- qlogis(pt_ps$pC)
   sd_lp <- pooled_sd(lT, lC)
@@ -71,7 +80,7 @@ for (g in c("psid", "cps")) {
     bal_rows[[paste(g, m)]] <- data.frame(
       group = label, method = m, covariate = c(COVS8, "logit_ps"),
       smd_before = c(before, before_ps), smd_after = c(after, after_ps),
-      note = if (m == "match") "Weights = number of times each control was matched (ties counted)" else "",
+      note = if (m == "match") "Weights = each control's total Match() weight (tied controls share one unit; the weights sum to the number of treated units)" else "",
       stringsAsFactors = FALSE)
 
     max_i <- which.max(abs(c(after, after_ps)))
@@ -101,6 +110,46 @@ for (g in c("psid", "cps")) {
   }
 }
 
+# ---- Cap shares for IPW and AIPW (review item, Deviation 7) ------------------
+# A comparison unit with raw propensity score below the cap gets the cap value,
+# so all such units share one weight. Shares below are of the 15,992 or 2,490
+# comparison units, and of the total Hajek weight.
+cap_rows <- list()
+for (g in c("psid", "cps")) {
+  label <- if (g == "psid") "PSID" else "CPS"
+  comp <- S[[g]]
+  cap_warn <- character(0)
+  ps <- withCallingHandlers(fit_ps(nswT, comp, COVS8),
+    warning = function(w) {
+      cap_warn <<- c(cap_warn, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
+  pC <- ps$pC
+  nC <- length(pC)
+  for (cap in c(0.01, 0.05)) {
+    pCc <- pmin(pmax(pC, cap), 1 - cap)
+    W <- pCc / (1 - pCc)
+    w <- W / sum(W)
+    capped <- pC < cap
+    cap_rows[[paste(g, cap)]] <- data.frame(
+      group = label, cap = cap,
+      n_comp = nC,
+      n_capped_low = sum(pC < cap),
+      share_capped_low = mean(pC < cap),
+      n_capped_high = sum(pC > 1 - cap),
+      share_weight_from_capped_low = sum(w[capped]) / sum(w),
+      max_weight_ratio = max(w) / mean(w),
+      ess = kish_ess(w),
+      n_raw_ps_exact_0_or_1 = sum(pC == 0 | pC == 1),
+      glm_warning = if (length(cap_warn) > 0) paste(unique(cap_warn), collapse = " | ") else "",
+      stringsAsFactors = FALSE)
+  }
+}
+cap_tbl <- do.call(rbind, cap_rows)
+rownames(cap_tbl) <- NULL
+write.csv(cap_tbl, file.path(res_dir, "overlap_cap_shares.csv"), row.names = FALSE)
+print(cap_tbl, digits = 4)
+
 bal <- do.call(rbind, bal_rows)
 rownames(bal) <- NULL
 write.csv(bal, file.path(res_dir, "balance_after_adjustment.csv"), row.names = FALSE)
@@ -110,4 +159,4 @@ rownames(diag) <- NULL
 write.csv(diag, file.path(res_dir, "diagnostics_weights_matching.csv"), row.names = FALSE)
 
 print(diag, digits = 4)
-print(bal[bal$covariate == "logit_ps" | abs(bal$smd_after) > 0.1, ], digits = 3)
+print(bal[which(bal$covariate == "logit_ps" | abs(bal$smd_after) > 0.1), ], digits = 3)

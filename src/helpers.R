@@ -279,3 +279,58 @@ tag <- function(cells, group) lapply(cells, function(x) { x$group <- group; x })
 sd_full <- function(S, comp, covs) {
   sapply(covs, function(v) pooled_sd(S$nswT[[v]], comp[[v]]))
 }
+
+# Core count for mclapply. Results do not depend on it (each replicate has its
+# own seed). Windows has no fork, so mclapply must run on one core there.
+default_cores <- function() {
+  if (.Platform$OS.type == "windows") return(1L)
+  min(8L, parallel::detectCores())
+}
+
+# Placebo cells (DESIGN.md 3e, Deviation 4(c)): re75 outcome, re75 removed from
+# the covariates. Used by 04_placebo.R and the seed run (09).
+placebo_cells <- function(label) {
+  list(
+    list(id = paste0(label, "_placebo_naive"), estimator = "1 Naive difference",
+         method = "naive", obs = OUT_RE75, bench = OUT_RE75, covs = COVS_PLACEBO,
+         trim = 0.01, caliper = 0.2, grid_type = "placebo", group = label),
+    list(id = paste0(label, "_placebo_reg"), estimator = "2 Regression adjustment",
+         method = "reg", obs = OUT_RE75, bench = OUT_RE75, covs = COVS_PLACEBO,
+         trim = 0.01, caliper = 0.2, grid_type = "placebo", group = label),
+    list(id = paste0(label, "_placebo_match"), estimator = "3 Nearest-neighbour matching",
+         method = "match", obs = OUT_RE75, bench = OUT_RE75, covs = COVS_PLACEBO,
+         trim = 0.01, caliper = 0.2, grid_type = "placebo", group = label),
+    list(id = paste0(label, "_placebo_ipw"), estimator = "4 Inverse probability weighting",
+         method = "ipw", obs = OUT_RE75, bench = OUT_RE75, covs = COVS_PLACEBO,
+         trim = 0.01, caliper = 0.2, grid_type = "placebo", group = label),
+    list(id = paste0(label, "_placebo_aipw"), estimator = "5 Doubly robust (AIPW)",
+         method = "aipw", obs = OUT_RE75, bench = OUT_RE75, covs = COVS_PLACEBO,
+         trim = 0.01, caliper = 0.2, grid_type = "placebo", group = label)
+  )
+}
+
+# Pre-trend cell for DiD (DESIGN.md 3e): change 1974 to 1975, unadjusted.
+pretrend_cell <- function(label) {
+  list(id = paste0(label, "_pretrend_did"), estimator = "6 Difference-in-differences",
+       method = "did", obs = OUT_CHG75_74, bench = OUT_CHG75_74,
+       covs = COVS8, trim = 0.01, caliper = 0.2, grid_type = "pretrend", group = label)
+}
+
+# Robustness grid cells (DESIGN.md 3f, Deviation 4(m)). Used by 06 and 09.
+grid_cells <- function(label) {
+  base <- function(id, est, method, covs, trim = 0.01, caliper = 0.2, variant) {
+    list(id = paste0(label, "_", id), estimator = est, method = method,
+         obs = OUT_RE78, bench = OUT_RE78, covs = covs, trim = trim,
+         caliper = caliper, grid_type = variant)
+  }
+  list(
+    base("ipw_trim05", "4 Inverse probability weighting", "ipw", COVS8, trim = 0.05, variant = "trim 0.05"),
+    base("aipw_trim05", "5 Doubly robust (AIPW)", "aipw", COVS8, trim = 0.05, variant = "trim 0.05"),
+    base("match_cal01", "3 Nearest-neighbour matching", "match", COVS8, caliper = 0.1, variant = "caliper 0.1 SD"),
+    base("match_nocal", "3 Nearest-neighbour matching", "match", COVS8, caliper = NULL, variant = "no caliper"),
+    base("reg_no74", "2 Regression adjustment", "reg", COVS_NO74, variant = "without re74"),
+    base("match_no74", "3 Nearest-neighbour matching", "match", COVS_NO74, variant = "without re74"),
+    base("ipw_no74", "4 Inverse probability weighting", "ipw", COVS_NO74, variant = "without re74"),
+    base("aipw_no74", "5 Doubly robust (AIPW)", "aipw", COVS_NO74, variant = "without re74")
+  )
+}

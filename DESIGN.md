@@ -250,9 +250,16 @@ Reproduction: `Rscript data/download_lalonde.R` then `Rscript src/01_benchmark.R
 
 ## 7. Why this is hard to reproduce in a day
 
-The benchmark can be computed in minutes, but the project takes a long time because each piece has to be checked against the others. The observational estimators need propensity models, overlap checks, and two different standard error methods (Abadie-Imbens and bootstrap) that disagree in small samples, and the comparison groups differ by a factor of about six in size. Each estimator has to be run on two comparison groups, passed through the benchmark test and the placebo test, and then through a robustness grid of about a dozen variations. The sensitivity analysis needs the Rosenbaum bounds and the partial R-squared calculations, and both need to be read carefully to say what they do and do not show. A second randomized dataset, with a constructed confounding rule, adds a separate data download, license check, and selection step. The write-up also has to explain every step in plain English for a reader without a coding background, which means each diagnostic must be interpreted, not just reported. Finally, the protocol is fixed in advance, so the work includes deciding the rules before results exist and then reporting results that may fail those rules. Doing all of that honestly, with checks on each estimator and each comparison group, takes more than a day.
+Revised 2026-10-30 (Deviation 7). The original version of this section claimed the work takes more than a day. No time was measured, so that claim is removed. The criterion in the project brief is judged here by the components the analysis contains, not by elapsed time:
 
----
+- Two comparison groups, each run through six estimators (12 primary cells), with a bootstrap of 2,000 replicates per cell.
+- Placebo tests on 1975 earnings and a 1974-to-1975 pre-trend test (12 more cells), and a supplementary placebo on 1974 earnings (Deviation 7).
+- A robustness grid of 16 cells, each with its own bootstrap.
+- Overlap and balance diagnostics, Rosenbaum bounds, and two sensitivity analyses (sensemakr).
+- A pre-stated pass rule with an informativeness guard, and the Abadie-Imbens standard error for matching, which the bootstrap cannot support (Deviation 7).
+- A bootstrap seed check across three seeds (Deviation 7).
+
+Whether this could be built in a day is not established by this repository. The first full pipeline was committed about 80 minutes after the first data commit, but commit times are a weak proxy and do not show the effort of the checks.
 
 ## 8. Limits to state in the write-up
 
@@ -306,3 +313,9 @@ The benchmark can be computed in minutes, but the project takes a long time beca
 - `src/04_placebo.R`: the placebo cells were missing a group label, which caused the first run to stop. The label was added and the script was run from the start. Its output files were overwritten by that run.
 - `src/03_diagnostics.R`: the diagnostics table had mismatched columns across methods. It now has a fixed set of columns.
 - Also in Deviation 5: `estimate()` in `src/helpers.R` now sums `Match`'s row weights for each comparison unit, instead of counting the rows. The previous count gave tied controls too much weight in the matching balance table. Only the balance diagnostic (`src/03_diagnostics.R`) changed. No estimate, bootstrap draw, or pass/fail result changed (checked: the matching ATT values are identical before and after the fix).
+
+**Deviation 6 (2026-10-30, recorded after the Component E results were produced; a fixed analysis added, no protocol choice changed).**
+- What happened: Component E item 3 (partial R-squared of each observed covariate, compared with the strength needed to explain the gap) was run only in the direction that moves the pooled estimate down, because `sensemakr`'s default is `reduce = TRUE`. The gap to the NSW benchmark is upward, so the same covariate-strength bounds were also run with `reduce = FALSE`.
+- Where: `src/05_sensitivity.R` now also writes `results/sensemakr_benchmark_upward.csv`. The existing outputs (`sensitivity_gamma.csv`, `sensemakr_rv.csv`) were regenerated and are byte-identical to the committed versions.
+- Rule applied: the phrase in Component E item 3 is chosen by whether any observed covariate's upward bound reaches the $1,794 benchmark. None does. The phrase applied is "the gap is not explained by a confounder as strong as the observed ones." The closest case is PSID 1975 earnings, at $1,770 ($24 short).
+- Protocol impact: none on estimators, samples, tuning, pass/fail rules, or the summary claim. The choice of phrase was open in the design text and was decided here, after the results were available. This is stated plainly as a post-results decision.

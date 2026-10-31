@@ -9,7 +9,7 @@ source(file.path("src", "helpers.R"))
 res_dir <- "results"
 proc_dir <- file.path("data", "processed")
 S <- load_samples()
-CORES <- 8L
+CORES <- default_cores()
 
 out <- list()
 for (g in c("psid", "cps")) {
